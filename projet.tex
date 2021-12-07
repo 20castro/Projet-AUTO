@@ -1,0 +1,333 @@
+\documentclass[10pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{cases}
+
+\title{Projet automatique}
+\author{David Castro et Anatole Hernot}
+\date{16 décembre 2021}
+
+\begin{document}
+\maketitle
+\theoremstyle{definition}
+
+\section{Système en boucle ouverte}
+
+\subsection*{Équation d'état}
+
+État $X = (x, v = \dot x, \theta, q = \dot{\theta})$, $u$, l'entrée de commande, $d$, l'entrée de perturbation, $x_m$ et $\theta_m$ les mesures et $x_m$ la sortie à commander.
+
+\vspace{10px}
+
+\noindent On a alors :  $\dot X = \begin{bmatrix} \dot x \\ \dot v \\ \dot \theta \\ \dot q \end{bmatrix} =
+\begin{bmatrix} v \\ x q^2 + g \sin \theta \\ q \\ \frac{gx \cos \theta + u + d - 2xqv}{\alpha + x^2} \end{bmatrix}$
+avec $\alpha = \frac{J}{m}$.
+
+\subsection*{Point d'équilibre}
+
+\[ \begin{cases} \bar v = 0 \\ \bar x \bar q^2 + g \sin \bar{\theta}  = 0 \\ \bar q = 0 \\ \frac{g \bar x \cos \bar{\theta} + \bar u + \bar d - 2 \bar x \bar q \bar v}{\alpha + \bar x^2} = 0 \end{cases} \]
+
+\[ \begin{cases} \bar v = 0 \\ \sin \bar{\theta}  = 0 \\ \bar q = 0 \\ g \bar x \cos \bar{\theta} + \bar u + \bar d = 0 \end{cases} \]
+
+\vspace{10px}
+
+\noindent Il y a donc deux points d'équilibre : $\left( - \frac{\bar u + \bar d}{g}, 0, 0, 0 \right)$ et $\left( \frac{\bar u + \bar d}{g}, 0, \pi, 0 \right)$.
+
+\subsection*{Linéarisation}
+
+On linéarise au premier point d'équilibre car si on atteint $\theta = \pi$, cela signifie que le rail s'est retourné et donc que la bille est tombée.
+
+\vspace{10px}
+
+\noindent Le système linéarisé tangent en ce point est :
+
+\begin{align}
+\delta \dot X &=
+	\begin{bmatrix} 
+		\delta v \\
+		2 \bar x \bar q \delta q + g \delta \theta \\
+		\delta q \\
+		\frac{g \delta x + \delta u + \delta d - 2 \bar q \bar v \delta x}{\alpha + \bar x^2} - 2 \bar x \delta x \frac{g \bar x + \bar u + \bar d}{\left( \alpha + \bar x^2 \right)^2}
+	\end{bmatrix} \notag \\
+	&= \begin{bmatrix} 
+		\delta v \\
+		g \delta \theta \\
+		\delta q \\
+		\frac{g \delta x + \delta u + \delta d}{\left( \alpha + \bar x^2 \right)^2}
+	\end{bmatrix} \notag \\
+	&= \underbrace{
+	\begin{bmatrix}
+		0 & 1 & 0 & 0 \\
+		0 & 0 & g & 0 \\
+		0 & 0 & 0 & 1 \\
+		\frac{g}{\alpha + \bar x^2} & 0 & 0 & 0
+	\end{bmatrix}
+	}_{A}
+	\delta X
+	+
+	\underbrace{
+	\begin{bmatrix}
+		0 & 0 \\
+		0 & 0 \\
+		0 & 0 \\
+		\frac{g}{\alpha + \bar x^2} & \frac{g}{\alpha + \bar x^2}
+	\end{bmatrix}
+	}_{B}
+	\delta e \notag
+\end{align}
+
+\subsection*{Calcul des valeurs propres}
+
+\begin{align}
+	\chi_A (X) &=
+	\begin{vmatrix}
+		X & -1 & 0 & 0 \\
+		0 & X & -g & 0 \\
+		0 & 0 & X & -1 \\
+		- \frac{g}{\alpha + \bar x^2} & 0 & 0 & X
+	\end{vmatrix} \notag \\
+	&= X \begin{vmatrix}
+		X & -g & 0 \\
+		0 & X & -1 \\
+		0 & 0 & X
+	\end{vmatrix} + 
+	\frac{g}{\alpha + \bar x^2} \begin{vmatrix}
+		-1 & 0 & 0 \\
+		X & -g & 0 \\
+		0 & X & -1
+	\end{vmatrix} \notag \\
+	&= X^4 - \frac{g^2}{\alpha + \bar x^2} \notag
+\end{align}
+
+\noindent D'où $\mathrm{Sp} \left( A \right) = \{ \beta ; - \beta ; \beta i ; - \beta i\}$ avec
+$\beta =  \sqrt[4]{\frac{g^2}{\alpha + \bar x^2}}  > 0$. Donc le système linéarisé est ue-instable.
+
+\section{Étude préliminaire en boucle fermée}
+
+\subsection*{Ajout d'un contrôleur sur $x$}
+
+Pour tâcher de rendre le système stable au point d'équilibre, on pose un contrôleur proportionnel-dérivé
+au niveau de la position :
+
+\[
+	\delta u = - k ( \delta x_m - \delta x_r ) - k_d \delta \dot x_m
+\]
+
+\noindent En notant $x_r$ la consigne de position. Alors en négligeant $\nu_x$ le bruit de mesure de $x$,
+on a $x_m = x$ et $\dot x_m = v$ donc :
+
+\begin{align}
+\delta \dot X &=
+	\begin{bmatrix}
+		0 & 1 & 0 & 0 \\
+		0 & 0 & g & 0 \\
+		0 & 0 & 0 & 1 \\
+		\frac{g}{\alpha + \bar x^2} & 0 & 0 & 0
+	\end{bmatrix}
+	\delta X
+	+
+	\begin{bmatrix}
+		0 & 0 \\
+		0 & 0 \\
+		0 & 0 \\
+		\frac{g}{\alpha + \bar x^2} & \frac{g}{\alpha + \bar x^2}
+	\end{bmatrix}
+	\begin{bmatrix}
+		- k ( \delta x - \delta x_r ) - k_d \delta v \\ \delta d
+	\end{bmatrix}
+	\notag \\
+	&= \underbrace{
+	\begin{bmatrix}
+		0 & 1 & 0 & 0 \\
+		0 & 0 & g & 0 \\
+		0 & 0 & 0 & 1 \\
+		\frac{g (1 - k)}{\alpha + \bar x^2} & - \frac{g k_d}{\alpha + \bar x^2} & 0 & 0
+	\end{bmatrix}
+	}_{A'}
+	\delta X
+	+
+	\begin{bmatrix}
+		0 & 0 \\
+		0 & 0 \\
+		0 & 0 \\
+		\frac{g}{\alpha + \bar x^2} & \frac{g}{\alpha + \bar x^2}
+	\end{bmatrix}
+	\begin{bmatrix}
+		k \delta x_r \\ \delta d
+	\end{bmatrix}
+	\notag
+\end{align}
+
+\noindent On obtient alors le polynôme caractéristique :
+
+\begin{align}
+	\chi_{A'} (X) &=
+	\begin{vmatrix}
+		X & -1 & 0 & 0 \\
+		0 & X & -g & 0 \\
+		0 & 0 & X & -1 \\
+		- \frac{g(1 - k)}{\alpha + \bar x^2} & \frac{g k_d}{\alpha + \bar x^2} & 0 & X
+	\end{vmatrix} \notag \\
+	&= X \begin{vmatrix}
+		X & -g & 0 \\
+		0 & X & -1 \\
+		\frac{g k_d}{\alpha + \bar x^2} & 0 & X
+	\end{vmatrix} + 
+	\frac{g(1 - k)}{\alpha + \bar x^2} \begin{vmatrix}
+		-1 & 0 & 0 \\
+		X & -g & 0 \\
+		0 & X & -1
+	\end{vmatrix} \notag \\
+	&= X \left( X^3 + \frac{g^2 k_d}{\alpha + \bar x^2} \right) - \frac{g^2 (1 - k)}{\alpha + \bar x^2} \notag \\
+	&= X^4 + \frac{g^2 k_d}{\alpha + \bar x^2} X - \frac{g^2 (1 - k)}{\alpha + \bar x^2} \notag
+\end{align}
+
+\noindent Le coefficient d'ordre $3$, c'est-à-dire en l'occurrence $n - 1$ où $n = 4$ est le degré du polynôme,
+est nul. Le critère de Routh donne donc directement que le système linéarisé n'est pas stable car $A'$
+n'a pas toutes ses valeurs propres à partie réelle strictement positive.
+
+\subsection*{Ajout d'un contrôleur sur : $\theta$}
+
+On pose cette fois le contrôleur proportionnel-dérivé au niveau de $\theta$ :
+
+\[
+	\delta u = - k ( \delta \theta_m - \delta \theta_r ) - k_d \delta \dot \theta_m
+\]
+
+\noindent En notant $\theta_r$ la consigne de position. Alors en négligeant $\nu_{\theta}$ le bruit de mesure de $\theta$ :
+
+\begin{align}
+\delta \dot X &=
+	\begin{bmatrix}
+		0 & 1 & 0 & 0 \\
+		0 & 0 & g & 0 \\
+		0 & 0 & 0 & 1 \\
+		\frac{g}{\alpha + \bar x^2} & 0 & 0 & 0
+	\end{bmatrix}
+	\delta X
+	+
+	\begin{bmatrix}
+		0 & 0 \\
+		0 & 0 \\
+		0 & 0 \\
+		\frac{g}{\alpha + \bar x^2} & \frac{g}{\alpha + \bar x^2}
+	\end{bmatrix}
+	\begin{bmatrix}
+		- k ( \delta \theta - \delta \theta_r ) - k_d \delta q \\ \delta d
+	\end{bmatrix}
+	\notag \\
+	&= \underbrace{
+	\begin{bmatrix}
+		0 & 1 & 0 & 0 \\
+		0 & 0 & g & 0 \\
+		0 & 0 & 0 & 1 \\
+		\frac{g}{\alpha + \bar x^2} & 0 & - \frac{g k}{\alpha + \bar x^2} & - \frac{g k_d}{\alpha + \bar x^2}
+	\end{bmatrix}
+	}_{A''}
+	\delta X
+	+
+	\begin{bmatrix}
+		0 & 0 \\
+		0 & 0 \\
+		0 & 0 \\
+		\frac{g}{\alpha + \bar x^2} & \frac{g}{\alpha + \bar x^2}
+	\end{bmatrix}
+	\begin{bmatrix}
+		k \delta \theta_r \\ \delta d
+	\end{bmatrix}
+	\notag
+\end{align}
+
+\noindent On obtient alors le polynôme caractéristique :
+
+\begin{align}
+	\chi_{A''} (X) &=
+	\begin{vmatrix}
+		X & -1 & 0 & 0 \\
+		0 & X & -g & 0 \\
+		0 & 0 & X & -1 \\
+		- \frac{g}{\alpha + \bar x^2} & 0 & \frac{g k}{\alpha + \bar x^2} & X + \frac{g k_d}{\alpha + \bar x^2}
+	\end{vmatrix} \notag \\
+	&= X \begin{vmatrix}
+		X & -g & 0 \\
+		0 & X & -1 \\
+		0 & \frac{g k}{\alpha + \bar x^2} & X + \frac{g k_d}{\alpha + \bar x^2}
+	\end{vmatrix} + 
+	\frac{g}{\alpha + \bar x^2} \begin{vmatrix}
+		-1 & 0 & 0 \\
+		X & -g & 0 \\
+		0 & X & -1
+	\end{vmatrix} \notag \\
+	&= X \left[ X^2 \left( X + \frac{g k_d}{\alpha + \bar x^2} \right) + \frac{gk}{\alpha + \bar x^2} X \right]
+		- \frac{g^2}{\alpha + \bar x^2} \notag \\
+	&= X^4 + \frac{g^2 k_d}{\alpha + \bar x^2} X^3 +  \frac{gk}{\alpha + \bar x^2} X^2
+		- \frac{g^2}{\alpha + \bar x^2} \notag
+\end{align}
+
+\noindent On applique le critère de Routh :
+
+\begin{align}
+	\begin{vmatrix}
+		\frac{g^2 k_d}{\alpha + \bar x^2} & 1 & 0 \\
+		0 & \frac{gk}{\alpha + \bar x^2} &\frac{g^2 k_d}{\alpha + \bar x^2} \\
+		0 & - \frac{g^2}{\alpha + \bar x^2} & 0
+	\end{vmatrix}
+	&> 0 \tag{\text{condition} 3} \\
+	\begin{vmatrix}
+		\frac{g^2 k_d}{\alpha + \bar x^2} & 1 & 0 & 0 \\
+		0 & \frac{gk}{\alpha + \bar x^2} &\frac{g^2 k_d}{\alpha + \bar x^2} & 1 \\
+		0 & - \frac{g^2}{\alpha + \bar x^2} & 0 & \frac{gk}{\alpha + \bar x^2} \\
+		0 & 0 & 0 & - \frac{g^2}{\alpha + \bar x^2}
+	\end{vmatrix}
+	&> 0 \tag{\text{condition} 4}
+\end{align}
+
+\vspace{10px}
+
+\noindent En notant $D$ le premier déterminant, on obtient en développant le second déterminant selon la dernière
+ligne le système :
+
+\[
+	\begin{cases}
+		D > 0 \\
+		- \frac{g^2}{\alpha + \bar x^2} D > 0
+	\end{cases}
+\]
+
+\noindent C'est impossible donc $A''$ admet des valeurs propres à partie réelle négative et le système linéarisé n'est
+pas stable.
+
+\subsection*{Conclusion sur la question 1}
+
+\fbox{
+	\begin{minipage}{0.96\textwidth}
+		Il n'est donc pas possible de commander le système en utilisant une seule des deux mesures :
+		dans les deux cas, on n'obtient pas un système stable. Il va donc falloir utiliser les deux.
+	\end{minipage}
+}
+
+\section{Système en boucle fermé}
+
+\newcommand{\kdx}{k^d_x}
+\newcommand{\kdt}{k^d_{\theta}}
+\newcommand{\fact}[1]{\frac{g #1 }{\alpha + \bar x^2}} % 1 nombre d'arguments
+
+\[
+	\delta u = - k_x ( \delta x_m - \delta x_r ) - \kdx \delta \dot x_m -
+	k_{\theta} ( \delta \theta_m - \delta \theta_r ) - \kdt \delta \dot \theta_m
+\]
+
+Test : $\fact{^2 \kdt}$
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
