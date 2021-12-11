@@ -187,7 +187,7 @@ on a $x_m = x$ et $\dot x_m = v$ donc :
 est nul. Le critère de Routh donne donc directement que le système linéarisé n'est pas stable car $A'$
 n'a pas toutes ses valeurs propres à partie réelle strictement positive.
 
-\subsection*{Ajout d'un contrôleur sur : $\theta$}
+\subsection*{Ajout d'un contrôleur sur $\theta$}
 
 On pose cette fois le contrôleur proportionnel-dérivé au niveau de $\theta$ :
 
@@ -309,16 +309,93 @@ pas stable.
 
 \section{Système en boucle fermé}
 
+\newcommand{\kt}{k_{\theta}}
 \newcommand{\kdx}{k^d_x}
 \newcommand{\kdt}{k^d_{\theta}}
 \newcommand{\fact}[1]{\frac{g #1 }{\alpha + \bar x^2}} % 1 nombre d'arguments
 
+\noindent Pour ce faire, on distingue deux sous-parties du système :
+
+\begin{itemize}
+	\item $\theta$ est considérée comme une variable rapide car c'est sur elle qu'influe directement la commande $u$ ;
+	\item $x$ est considéré comme une variable lente car ses variations sont consécutives à celles de $\theta$ et
+	pas directement à la commande.
+\end{itemize}
+
+\noindent On va donc contrôler le système rapide par un un P et le système lent par un PID, comme suit :
+
 \[
-	\delta u = - k_x ( \delta x_m - \delta x_r ) - \kdx \delta \dot x_m -
-	k_{\theta} ( \delta \theta_m - \delta \theta_r ) - \kdt \delta \dot \theta_m
+	\begin{cases}
+		\theta_r = - k_i \eta - k x_m - k_d \dot x_m \\
+		\dot \eta = x_m - x_r
+	\end{cases}
+\]
+\[
+	u = - \lambda ( \theta_m - \theta_r ) \left[ - \mu \dot \theta_m \text{ pour l'instant non, à ajouter pour PD} \right]
 \]
 
-Test : $\fact{^2 \kdt}$
+\noindent Le système devient alors 
+$\begin{bmatrix} 
+	\dot x \\
+	\dot v \\
+	\dot \theta \\
+	\dot q
+\end{bmatrix} =
+\begin{bmatrix} 
+	v \\
+	x q^2 + g \sin \theta \\
+	q \\ 
+	\frac{gx \cos \theta - \lambda ( \theta + k_i \eta + k x + k_d v ) +
+	d - 2xqv}{\alpha + x^2}
+\end{bmatrix}$.
+
+\vspace{10px}
+
+\noindent Le système étant rapide,
+on considère $\lambda$ grand donc $\varepsilon = \frac{1}{\lambda}$ petit. La dernière équation devient :
+
+\[
+	\varepsilon \dot q = \frac{\varepsilon gx \cos \theta - ( \theta + k_i \eta + k x + k_d v ) +
+	\varepsilon d - 2 \varepsilon xqv}{\alpha + x^2}
+\]
+
+\noindent Par perturbations singulières, on peut simplifier $\theta = - k_i \eta - k x - k_d v$.
+
+\noindent ... ue-stable
+
+\noindent On considère alors la nouvelle variable d'état : $(x, v, \eta)$. [ Si PD $\to$ $(x, v, a, \eta)$]
+
+\vspace{10px}
+
+\newpage
+
+NON
+
+\noindent On néglige toujours les deux bruits de mesure $\nu_x$ et $\nu_\theta$. Ce contrôleur donne alors le linéarisé :
+
+\[
+	\delta \dot X = \underbrace{
+	\begin{bmatrix}
+		0 & 1 & 0 & 0 \\
+		0 & 0 & g & 0 \\
+		0 & 0 & 0 & 1 \\
+		\fact{(1 - k_x)} & - \fact{\kdx} & - \fact{\kt} & - \fact{\kdt}
+	\end{bmatrix}
+	}_{\tilde A}
+	\delta X
+	+
+	\begin{bmatrix}
+		0 & 0 \\
+		0 & 0 \\
+		0 & 0 \\
+		\fact{} & \fact{}
+	\end{bmatrix}
+	\begin{bmatrix}
+		k_x \delta \theta_r + \kt \delta \theta_r \\ \delta d
+	\end{bmatrix}
+\]
+
+On note $\fact{} = \gamma$ dans la suite. Alors on obtient le polynôme caractéristique : ...
 
 \end{document}
 
