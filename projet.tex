@@ -377,7 +377,7 @@ en négligeant toujours les deux bruits de mesure $\nu_x$ et $\nu_\theta$ :
 	0 = - \frac{\theta + k_i \eta + k x + k_d v}{\alpha + x^2}
 \]
 
-\noindent D'où la simplification :  $\theta = - k_i \eta - k x - k_d v$. La branche d'équilibre est ue-stable car :
+\noindent D'où la simplification :  $\theta = - k_i \eta - k x - k_d v \ (\star)$. La branche d'équilibre est ue-stable car :
 
 \[
 	\partial_{\theta} g |_{\theta = - k_i \eta - k x - k_d v} = - \frac{1}{\alpha + x^2} < 0
@@ -397,14 +397,60 @@ en considérant le nouveau système simplifié ``lent'' :
 	\end{bmatrix} =
 	\begin{bmatrix}
 	 	v \\
-		g \sin \left( - k_i \eta - k x - k_d v \right) + x q^2 \text{ q ???} \\
+		g \sin \left( - k_i \eta - k x - k_d v \right) + x q^2 \\
 		x - x_r
 	\end{bmatrix}
 \]
 
-\noindent On obtient finalement le linéarisé puis le polynôme caractéristique suivants : ...
+\noindent Avec $q = \dot \theta = - k_i \dot \eta - k \dot x - k_d \dot v$, que l'on obtient en dérivant $(\star)$.
 
-\noindent Routh, stabilité
+\begin{align}
+	\delta \dot v &= - g \left( k_i \delta \eta + k \delta x + k_d \delta v \right) \cos \left( k_i \eta + k x + k_d v \right) +
+	2 x q \delta q + q^2 \delta x \notag \\
+	&= ... ? \ \delta q \ ? \text{ au point d'équilibre } ? \notag
+	%-g \left( k_i \delta \eta + k \delta x + k_d \delta v \right) \cos \left( k_i \eta + k x + k_d v \right) +
+	%2 x q \delta q + q^2 \delta x
+\end{align}
+
+\noindent On obtient finalement le linéarisé puis le polynôme caractéristique suivants :
+
+\[
+	\delta \dot X' = \underbrace{
+	\begin{bmatrix}
+		0 & 1 & 0 \\
+		- g k & - g k_d & - g k_i \\
+		1 & 0 & 0
+	\end{bmatrix}
+	}_{\tilde A}
+	\delta X'
+	+
+	\begin{bmatrix}
+		0 \\
+		0 \\
+		- 1
+	\end{bmatrix}
+	\delta x_r
+\]
+\begin{align}
+	\chi_{\tilde A} ( X) &=
+	\begin{vmatrix}
+		X & - 1 & 0 \\
+		g k & X + g k_d & g k_i \\
+		- 1 & 0 & X
+	\end{vmatrix} \notag \\
+	&= X^2 ( X + g k_d ) + g k X + g k_i \notag \\
+	&= X^3 + g k_d X^2 + g k X + g k_i \notag
+\end{align}
+
+\subsection*{Paramétrage (attention au $\delta q$ pour l'instant)}
+
+\noindent Le critère de Routh donne $k_d > 0$, $g k_i k > k_d$ et $g k_d k_i k > k_i^2$ pour que le système lent
+soit stable.
+
+\vspace{10px}
+
+\noindent On va maintenant identifier le polynôme caractéristique $\chi_{\tilde A}$ avec ... qui donne de bonnes
+performances tout en s'assurant que les inégalités issues du critère de Routh sont vérifiées.
 
 \subsection*{Conclusion sur la question 2}
 
@@ -421,36 +467,6 @@ en considérant le nouveau système simplifié ``lent'' :
 		On impose $\bar u = ...$ de sorte à avoir $\bar x = 0,4$ avec la condition initiale $x_{t=0} = 0$.
 	\end{minipage}
 }
-
---------------------------------------------------------
-
-\vspace{10px}
-
-
-
-NON
-
-\[
-	\delta \dot X = \underbrace{
-	\begin{bmatrix}
-		0 & 1 & 0 & 0 \\
-		0 & 0 & g & 0 \\
-		0 & 0 & 0 & 1 \\
-		\fact{(1 - k_x)} & - \fact{\kdx} & - \fact{\kt} & - \fact{\kdt}
-	\end{bmatrix}
-	}_{\tilde A}
-	\delta X
-	+
-	\begin{bmatrix}
-		0 & 0 \\
-		0 & 0 \\
-		0 & 0 \\
-		\fact{} & \fact{}
-	\end{bmatrix}
-	\begin{bmatrix}
-		k_x \delta \theta_r + \kt \delta \theta_r \\ \delta d
-	\end{bmatrix}
-\]
 
 \end{document}
 
