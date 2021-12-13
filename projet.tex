@@ -327,90 +327,93 @@ pas stable.
 	pas directement à la commande.
 \end{itemize}
 
-\noindent On va donc contrôler le système rapide par un un P et le système lent par un PID, comme suit :
+\noindent On va donc contrôler le système rapide par un un PD et le système lent par un PID, comme suit :
 
 \[
 	\begin{cases}
 		\theta_r = - k_i \eta - k x_m - k_d \dot x_m \\
 		\dot \eta = x_m - x_r \\
-		u = - \lambda ( \theta_m - \theta_r )
+		u = - \lambda ( \theta_m - \theta_r ) - \mu \dot \theta_m
 	\end{cases}
 \]
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\linewidth]{schema.pdf}
+	\includegraphics[width=\linewidth]{schemaPD+PID.pdf}
 	\caption{Architecture du système bouclé}
 \end{figure}
 
-\noindent Le système devient alors 
-$\begin{bmatrix} 
-	\dot x \\
-	\dot v \\
-	\dot \theta \\
-	\dot q
-\end{bmatrix} =
-\begin{bmatrix} 
-	v \\
-	x q^2 + g \sin \theta \\
-	q \\ 
-	\frac{gx \cos \theta - \lambda ( \theta + k_i \eta + k x + k_d v ) +
-	d - 2xqv}{\alpha + x^2}
-\end{bmatrix}$.
+\subsection*{Paramétrage du système rapide}
 
-\vspace{10px}
-
-\noindent Le système étant rapide,
-on considère $\lambda$ grand donc $\varepsilon = \frac{1}{\lambda}$ petit. La dernière équation devient alors,
-en négligeant toujours les deux bruits de mesure $\nu_x$ et $\nu_\theta$ :
-
-\begin{align}
-	\varepsilon \dot q &= \frac{\varepsilon gx \cos \theta - ( \theta + k_i \eta + k x + k_d v ) +
-	\varepsilon d - 2 \varepsilon xqv}{\alpha + x^2} \notag \\
-	&= - \frac{\theta + k_i \eta + k x + k_d v}{\alpha + x^2} + O (\varepsilon) \notag \\
-	&:= g (x, v, \theta, q, \eta, \varepsilon) \notag
-\end{align}
-
-\noindent Si on fait maintenant $\varepsilon = 0$, on obtient l'équation algébrique :
+\noindent En négligeant toujours les bruits de mesure, le système rapide vérifie :
 
 \[
-	0 = - \frac{\theta + k_i \eta + k x + k_d v}{\alpha + x^2}
+	\begin{cases}
+		\dot \theta = q \\
+		\dot q =
+		\frac{gx \cos \theta - \lambda ( \theta + k_i \eta + k x + k_d v ) - \mu q + d - 2xqv}{\alpha + x^2}
+	\end{cases}
 \]
 
-\noindent D'où la simplification :  $\theta = - k_i \eta - k x - k_d v \ (\star)$. La branche d'équilibre est ue-stable car :
+\noindent Cela donne le linéarisé, en notant $\gamma = \frac{1}{\alpha + \bar x^2} > 0$ :
 
 \[
-	\partial_{\theta} g |_{\theta = - k_i \eta - k x - k_d v} = - \frac{1}{\alpha + x^2} < 0
-\]
-
-\subsection*{Système lent}
-
-\noindent On considère alors la nouvelle variable d'état : $(x, v, \eta)$. Le théorème des
-perturbations singulières affirme qu'on ne fait qu'une erreur de l'ordre de $\varepsilon$
-en considérant le nouveau système simplifié ``lent'' :
-
-\[
-	 \begin{bmatrix}
-	 	\dot x \\
-		\dot v \\
-		\dot \eta
-	\end{bmatrix} =
 	\begin{bmatrix}
-	 	v \\
-		g \sin \left( - k_i \eta - k x - k_d v \right) + x q^2 \\
-		x - x_r
+		\delta \dot \theta \\
+		\delta \dot q
 	\end{bmatrix}
+	=\begin{bmatrix}
+		0 & 1 \\
+		- \gamma \lambda & - \gamma \mu
+	\end{bmatrix}
+	\begin{bmatrix}
+		\delta \theta \\
+		\delta q
+	\end{bmatrix} +
+	B_x \delta x +
+	B_v \delta v +
+	B_\eta \delta \eta +
+	B_d \delta d
 \]
 
-\noindent Avec $q = \dot \theta = - k_i \dot \eta - k \dot x - k_d \dot v$, que l'on obtient en dérivant $(\star)$.
+\noindent Puis le polynôme caractéristique :
+
+\[
+	\begin{vmatrix}
+		X & -1 \\
+		\gamma \lambda & X + \gamma \mu
+	\end{vmatrix}
+	= X^2 + \gamma \mu X + \gamma \lambda
+\]
+
+\noindent D'après le critère de Routh, le système rapide est donc stable si $\lambda > 0$ et $\mu > 0$. On souhaite
+imposer un temps de réponse de $0,1 s$. On se propose d'identifier le polynôme caractéristique précédent avec
+$X^2 + 2 \xi \omega_0 X + \omega_0^2$ où $\omega_0 = \frac{2 \pi}{0,1} = 20 \pi$ et $\xi = \frac{\sqrt 2}{2}$.
+Alors :
 
 \begin{align}
-	\delta \dot v &= - g \left( k_i \delta \eta + k \delta x + k_d \delta v \right) \cos \left( k_i \eta + k x + k_d v \right) +
-	2 x q \delta q + q^2 \delta x \notag \\
-	&= ... ? \ \delta q \ ? \text{ au point d'équilibre } ? \notag
-	%-g \left( k_i \delta \eta + k \delta x + k_d \delta v \right) \cos \left( k_i \eta + k x + k_d v \right) +
-	%2 x q \delta q + q^2 \delta x
+	\lambda &= \frac{\omega_0^2}{\gamma} = \frac{(20 \pi)^2}{\gamma} > 0 \notag \\
+	\mu &= 20 \sqrt 2	 \pi > 0 \notag
 \end{align}
+
+\noindent Le critère de Routh est bien vérifié par ce paramétrage du système rapide.
+
+\subsection*{Paramétrage du système lent}
+
+\noindent La branche d'équilibre est donnée par : ...
+
+\[
+	 \begin{cases}
+	 	\dot x = v \\
+		\dot v = g \sin \theta + x q^2 \\
+		\dot \eta = x - x_r
+	\end{cases}
+\]
+
+
+
+---------------------------------------------------------------------------------------------------
+
 
 \noindent On obtient finalement le linéarisé puis le polynôme caractéristique suivants :
 
@@ -451,6 +454,46 @@ soit stable.
 
 \noindent On va maintenant identifier le polynôme caractéristique $\chi_{\tilde A}$ avec ... qui donne de bonnes
 performances tout en s'assurant que les inégalités issues du critère de Routh sont vérifiées.
+
+
+\noindent Le système devient alors 
+$\begin{bmatrix} 
+	\dot x \\
+	\dot v \\
+	\dot \theta \\
+	\dot q
+\end{bmatrix} =
+\begin{bmatrix} 
+	v \\
+	x q^2 + g \sin \theta \\
+	q \\ 
+	\frac{gx \cos \theta - \lambda ( \theta + k_i \eta + k x + k_d v ) + d - 2xqv}{\alpha + x^2}
+\end{bmatrix}$.
+
+\vspace{10px}
+
+\noindent Le système étant rapide,
+on considère $\lambda$ grand donc $\varepsilon = \frac{1}{\lambda}$ petit. La dernière équation devient alors,
+en négligeant toujours les deux bruits de mesure $\nu_x$ et $\nu_\theta$ :
+
+\begin{align}
+	\varepsilon \dot q &= \frac{\varepsilon gx \cos \theta - ( \theta + k_i \eta + k x + k_d v ) +
+	\varepsilon d - 2 \varepsilon xqv}{\alpha + x^2} \notag \\
+	&= - \frac{\theta + k_i \eta + k x + k_d v}{\alpha + x^2} + O (\varepsilon) \notag \\
+	&:= g (x, v, \theta, q, \eta, \varepsilon) \notag
+\end{align}
+
+\noindent Si on fait maintenant $\varepsilon = 0$, on obtient l'équation algébrique :
+
+\[
+	0 = - \frac{\theta + k_i \eta + k x + k_d v}{\alpha + x^2}
+\]
+
+\noindent D'où la simplification :  $\theta = - k_i \eta - k x - k_d v \ (\star)$. La branche d'équilibre est ue-stable car :
+
+\[
+	\partial_{\theta} g |_{\theta = - k_i \eta - k x - k_d v} = - \frac{1}{\alpha + x^2} < 0
+\]
 
 \subsection*{Conclusion sur la question 2}
 
