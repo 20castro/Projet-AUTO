@@ -337,8 +337,8 @@ pas stable.
 
 \[
 	\begin{cases}
-		\theta_r = - k_i \eta - k x_m - k_d \dot x_m \\
-		\dot \eta = x_m - x_r \\
+		\theta_r = - k_i \rho - k x_m - k_d \dot x_m \\
+		\dot \rho = x_m - x_r \\
 		u = - \lambda ( \theta_m - \theta_r ) - \mu \dot \theta_m
 	\end{cases}
 \]
@@ -357,7 +357,7 @@ pas stable.
 	\begin{cases}
 		\dot \theta = q \\
 		\dot q =
-		\frac{gx \cos \theta - \lambda ( \theta + k_i \eta + k x + k_d v ) - \mu q + d - 2xqv}{\alpha + x^2}
+		\frac{gx \cos \theta - \lambda ( \theta + k_i \rho + k x + k_d v ) - \mu q + d - 2xqv}{\alpha + x^2}
 	\end{cases}
 \]
 
@@ -378,7 +378,7 @@ pas stable.
 	\end{bmatrix} +
 	B_x \delta x +
 	B_v \delta v +
-	B_\eta \delta \eta +
+	B_\rho \delta \rho +
 	B_d \delta d
 \]
 
@@ -399,7 +399,7 @@ Alors :
 
 \begin{align}
 	\lambda &= \frac{\omega_0^2}{\gamma} = \frac{(20 \pi)^2}{\gamma} > 0 \notag \\
-	\mu &= 20 \sqrt 2	 \pi > 0 \notag
+	\mu &= \frac{20 \sqrt 2 \pi}{\gamma} > 0 \notag
 \end{align}
 
 \noindent Le critère de Routh est bien vérifié par ce paramétrage du système rapide.
@@ -409,9 +409,9 @@ Alors :
 \noindent La branche d'équilibre est donnée par : $\delta q= \delta \dot q = 0$. D'où :
 
 \begin{align}
-	0 &= \gamma \left[ g \delta x + \delta d - \lambda ( \delta \theta + k_i \delta \eta + k \delta x + k_d \delta v )
+	0 &= \gamma \left[ g \delta x + \delta d - \lambda ( \delta \theta + k_i \delta \rho + k \delta x + k_d \delta v )
 	- \mu \delta q \right] \notag \\
-	\lambda \delta \theta &= g \delta x + \delta d - \lambda k_i \delta \eta - \lambda k \delta x - \lambda k_d \delta v \notag 
+	\lambda \delta \theta &= g \delta x + \delta d - \lambda k_i \delta \rho - \lambda k \delta x - \lambda k_d \delta v \notag 
 \end{align}
 
 \noindent Le système lent est d'autre part régi par :
@@ -420,17 +420,17 @@ Alors :
 	 \begin{cases}
 	 	\dot x = v \\
 		\dot v = g \sin \theta + x q^2 \\
-		\dot \eta = x - x_r
+		\dot \rho = x - x_r
 	\end{cases}
 \]
 
-\noindent Donc :
+\noindent Donc en notant $\eta = \delta \rho$ :
 
 \[
 	\begin{bmatrix}
 		\delta \dot x \\
 		\delta \dot v \\
-		\delta \dot \eta
+		\dot \eta
 	\end{bmatrix}
 	= \begin{bmatrix}
 		\delta v \\
@@ -483,6 +483,140 @@ en effet, dans ces conditions :
 	\end{minipage}
 }
 
+\subsection*{Implémentation Simulink}
+
+\subsubsection*{Approximation des dérivées}
+
+\noindent Afin d'obtenir une version implémentable du contrôleur, on remplace les deux termes dérivés par
+leur approximation filtrée. On pose $T_1 =\frac{k_d}{k}$ et $T_2 = \frac{\mu}{\lambda}$. On prend $\varepsilon = \inv{n}$
+et on remplace donc $k_d \delta \dot x = k T_1 \delta \dot x$ et
+$\mu \delta \dot \theta = \lambda T_2 \delta \dot \theta$ comme suit :
+
+\[
+	\begin{bmatrix}
+		\dot \eta_x \\
+		\dot \eta \\
+		\delta \theta_r
+	\end{bmatrix}
+	= \begin{bmatrix}
+		\frac{\delta x - \eta_x}{\varepsilon T_1} \\
+		\delta x - \delta x_r \\
+		- k_i \eta - k \delta x - k \frac{\delta x - \eta_x}{\varepsilon}
+	\end{bmatrix}
+	= \begin{bmatrix}
+		\frac{n}{T_1} ( \delta x - \eta_x ) \\
+		\delta x - \delta x_r \\
+		- k_i \eta - k (1 + n) \delta x + k n \eta_x
+	\end{bmatrix}
+\]
+\[
+	\begin{bmatrix}
+		\dot \eta_\theta \\
+		\delta u
+	\end{bmatrix}
+	= \begin{bmatrix}
+		\frac{\delta \theta - \eta_x}{\varepsilon T_2} \\
+		- \lambda ( \delta \theta - \delta \theta_r ) - \lambda \frac{\delta \theta - \eta_x}{\varepsilon}
+	\end{bmatrix}
+	= \begin{bmatrix}
+		\frac{n}{T_2} ( \delta \theta - \eta_\theta ) \\
+		- \lambda ( 1 + n ) \delta \theta + \lambda \delta \theta_r + \lambda n \eta_\theta
+	\end{bmatrix}
+\]
+
+\vspace{10px}
+
+\noindent Respectivement pour le contrôleur PD et pour le PID. On va alors prendre $n = 20$ pour approximer au mieux
+la dérivée. 
+
+\subsubsection*{Passage aux différences finies}
+
+\noindent On peut réécrire le jeux d'équations :
+
+\[
+	\begin{cases}
+		\dot \eta_x = \frac{n}{T_1} ( \delta x - \eta_x ) \\
+		\dot \eta = \delta x - \delta x_r \\
+		\dot \eta_\theta = \frac{n}{T_2} ( \delta \theta - \eta_\theta ) \\
+		\delta u = - \lambda ( 1 + n ) \delta \theta - \lambda k_i \eta -  \lambda k (1 + n) \delta x +
+		\lambda k n \eta_x + \lambda n \eta_\theta
+	\end{cases}
+\]
+
+\noindent On remplace maintenant les termes en $\delta$ par les différences finies : $\delta x \to x - \bar x$,
+$\delta x_r \to x_r - \bar x$, $\delta \theta \to \theta - \bar \theta$ et $\delta u = u - \bar u$.
+
+\[
+	\begin{bmatrix}
+		\dot \eta_x \\
+		\dot \eta \\
+		\dot \eta_\theta \\
+		u - \bar u
+	\end{bmatrix}
+	= \begin{bmatrix}
+		\frac{n}{T_1} ( x - \bar x - \eta_x ) \\
+		x - x_r \\
+		\frac{n}{T_2} ( \theta - \bar \theta - \eta_\theta ) \\
+		- \lambda ( 1 + n ) ( \theta - \bar \theta ) - \lambda k_i \eta - \lambda k (1 + n) ( x - \bar x ) +
+		\lambda k n \eta_x + \lambda n \eta_\theta
+	\end{bmatrix}
+\]
+
+\noindent On pose  $\mu_i = \eta + \inv{\lambda k_i} \left( \bar u +
+\lambda (1 + n) \bar \theta + \lambda k (1 + n) \bar x - \lambda k n \bar x -
+\lambda k n \bar \theta \right)$, $\mu_x = \eta_x + \bar x$ et $\mu_\theta = \eta_\theta + \bar \theta$.
+
+\noindent On obtient finalement le contrôleur implémentable suivant :
+
+\[
+	\begin{bmatrix}
+		\dot \mu_x \\
+		\dot \mu_i \\
+		\dot \mu_\theta \\
+		u
+	\end{bmatrix}
+	= \begin{bmatrix}
+		\frac{n}{T_1} ( x - \mu_x ) \\
+		x - x_r \\
+		\frac{n}{T_2} ( \theta - \mu_\theta ) \\
+		- \lambda ( 1 + n ) \theta - \lambda k_i \mu_i - \lambda k (1 + n) x + \lambda k n \mu_x + \lambda n \mu_\theta
+	\end{bmatrix}
+\]
+
+\vspace{10px}
+
+\noindent On note $X = (\mu_x, \mu_i, \mu_\theta)$, $U = (x, \theta, x_r)$ et $Y = u$. Alors :
+
+\[
+	\begin{cases}
+		\dot X =
+		\underbrace{
+		\begin{bmatrix}
+			- \frac{n}{T_1} & 0 & 0 \\
+			0 & 0 & 0 \\
+			0 & 0 & - \frac{n}{T_2}
+		\end{bmatrix}
+		}_{M} X +
+		\underbrace{
+		\begin{bmatrix}
+			\frac{n}{T_1} & 0 & 0 \\
+			1 & 0 & -1 \\
+			0 & \frac{n}{T_2} & 0
+		\end{bmatrix}
+		}_{N} U \\
+		Y = \underbrace{
+		\begin{bmatrix}
+			\lambda k n & \lambda n & - \lambda k_i
+		\end{bmatrix}
+		}_{P} X +
+		\underbrace{
+		\begin{bmatrix}
+			- \lambda k (1 + n) &- \lambda (1 + n) & 0
+		\end{bmatrix}
+		}_{Q} U
+	\end{cases}
+\]
+
 \subsection*{Conclusion sur la question 3}
 
 \fbox{
@@ -490,34 +624,6 @@ en effet, dans ces conditions :
 		On impose $\bar u = ...$ de sorte à avoir $\bar x = 0,4$ avec la condition initiale $x_{t=0} = 0$.
 	\end{minipage}
 }
-
-\vspace{30px}
-
-\noindent ------------------------------------------ Obsolète ------------------------------------------------
-
-
-\noindent Le système étant rapide,
-on considère $\lambda$ grand donc $\varepsilon = \frac{1}{\lambda}$ petit. La dernière équation devient alors,
-en négligeant toujours les deux bruits de mesure $\nu_x$ et $\nu_\theta$ :
-
-\begin{align}
-	\varepsilon \dot q &= \frac{\varepsilon gx \cos \theta - ( \theta + k_i \eta + k x + k_d v ) +
-	\varepsilon d - 2 \varepsilon xqv}{\alpha + x^2} \notag \\
-	&= - \frac{\theta + k_i \eta + k x + k_d v}{\alpha + x^2} + O (\varepsilon) \notag \\
-	&:= g (x, v, \theta, q, \eta, \varepsilon) \notag
-\end{align}
-
-\noindent Si on fait maintenant $\varepsilon = 0$, on obtient l'équation algébrique :
-
-\[
-	0 = - \frac{\theta + k_i \eta + k x + k_d v}{\alpha + x^2}
-\]
-
-\noindent D'où la simplification :  $\theta = - k_i \eta - k x - k_d v \ (\star)$. La branche d'équilibre est ue-stable car :
-
-\[
-	\partial_{\theta} g |_{\theta = - k_i \eta - k x - k_d v} = - \frac{1}{\alpha + x^2} < 0
-\]
 
 \end{document}
 
