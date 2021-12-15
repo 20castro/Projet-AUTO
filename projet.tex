@@ -478,8 +478,8 @@ en effet, dans ces conditions :
 
 \fbox{
 	\begin{minipage}{0.96\textwidth}
-		On a bien les systèmes lents et rapides stables. En prenant $\omega_0 = 0,1 s$ et $\sigma = 1$,
-		on a alors une réponse temporelle de ...
+		On a bien les systèmes lents et rapides stables. En prenant $\sigma = 3,42$,
+		on a alors une réponse temporelle de l'ordre de $1$ seconde.
 	\end{minipage}
 }
 
@@ -585,7 +585,7 @@ $\delta x_r \to x_r - \bar x$, $\delta \theta \to \theta - \bar \theta$ et $\del
 
 \vspace{10px}
 
-\noindent On note $X = (\mu_x, \mu_i, \mu_\theta)$, $U = (x, \theta, x_r)$ et $Y = u$. Alors :
+\noindent On note $X = (\mu_x, \mu_i, \mu_\theta)$, $U = (x, \theta, x_r)$ et $Y = u$. Alors le contrôleur est donné par :
 
 \[
 	\begin{cases}
@@ -606,7 +606,7 @@ $\delta x_r \to x_r - \bar x$, $\delta \theta \to \theta - \bar \theta$ et $\del
 		}_{N} U \\
 		Y = \underbrace{
 		\begin{bmatrix}
-			\lambda k n & \lambda n & - \lambda k_i
+			\lambda k n &  - \lambda k_i & \lambda n
 		\end{bmatrix}
 		}_{P} X +
 		\underbrace{
@@ -617,13 +617,37 @@ $\delta x_r \to x_r - \bar x$, $\delta \theta \to \theta - \bar \theta$ et $\del
 	\end{cases}
 \]
 
+\subsubsection*{Conditions intiales}
+
+\noindent On suppose enfin que l'on part d'un point d'équilibre. On prend donc les conditions initiales suivantes :
+
+\[
+	X_{t = 0} = \begin{bmatrix}
+		\mu_x (t = 0) \\
+		\mu_i (t = 0) \\
+		\mu_\theta (t = 0)
+	\end{bmatrix}
+	= \begin{bmatrix}
+		\bar x \\
+		\frac{-1}{k_i} ( k \bar x + \bar \theta +\frac{\bar u}{\lambda}  ) \\
+		\bar \theta
+	\end{bmatrix}
+\]
+
 \subsection*{Conclusion sur la question 3}
 
 \fbox{
 	\begin{minipage}{0.96\textwidth}
-		On impose $\bar u = ...$ de sorte à avoir $\bar x = 0,4$ avec la condition initiale $x_{t=0} = 0$.
+		On prend enfin la condition intiale $X = \bar X$ correspondant au point d'équilibre associé à $\bar x = 0$
+		et $x_r = 0,4 m$ de sorte que la bille parcoure $40 cm$.
 	\end{minipage}
 }
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{resultat.pdf}
+	\caption{Résultat du contrôle}
+\end{figure}
 
 \end{document}
 
