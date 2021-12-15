@@ -333,7 +333,7 @@ pas stable.
 	pas directement à la commande.
 \end{itemize}
 
-\noindent On va donc contrôler le système rapide par un un PD et le système lent par un PID, comme suit :
+\noindent On va donc contrôler le système rapide par un PD et le système lent par un PID, comme suit :
 
 \[
 	\begin{cases}
@@ -424,7 +424,7 @@ Alors :
 	\end{cases}
 \]
 
-\noindent Donc en notant $\eta = \delta \rho$ :
+\noindent Donc en notant $\eta = \delta \rho$, on a au point d'équilibre le linéarisé :
 
 \[
 	\begin{bmatrix}
@@ -478,7 +478,7 @@ en effet, dans ces conditions :
 
 \fbox{
 	\begin{minipage}{0.96\textwidth}
-		On a bien les systèmes lents et rapides stables. En prenant $\sigma = 3,42$,
+		On a bien les systèmes lents et rapides stables. En prenant $\sigma = 3,42 \ rad \cdot s^{-1}$,
 		on a alors une réponse temporelle de l'ordre de $1$ seconde.
 	\end{minipage}
 }
@@ -562,9 +562,9 @@ $\delta x_r \to x_r - \bar x$, $\delta \theta \to \theta - \bar \theta$ et $\del
 	\end{bmatrix}
 \]
 
-\noindent On pose  $\mu_i = \eta + \inv{\lambda k_i} \left( \bar u +
+\noindent On pose  $\mu_i = \eta - \inv{\lambda k_i} \left[ \bar u +
 \lambda (1 + n) \bar \theta + \lambda k (1 + n) \bar x - \lambda k n \bar x -
-\lambda k n \bar \theta \right)$, $\mu_x = \eta_x + \bar x$ et $\mu_\theta = \eta_\theta + \bar \theta$.
+\lambda k n \bar \theta \right]$, $\mu_x = \eta_x + \bar x$ et $\mu_\theta = \eta_\theta + \bar \theta$.
 
 \noindent On obtient finalement le contrôleur implémentable suivant :
 
@@ -655,7 +655,7 @@ et $x_r = 0,4 m$ de sorte que la bille parcoure $40 cm$, on a les résultats gra
 		les consignes suivantes qui répondent au problème :
 		\begin{itemize}
 			\item Un échelon de valeur initiale $-0,3m$ et de valeur finale $0,3m$
-			\item Une consigne sinusoïdale de phase et de biais nuls et d'amplitude $0,6m$
+			\item Une consigne sinusoïdale de phase et de biais nuls et d'amplitude $0,4m$
 			\item Une rampe de valeur initiale $-0,3m$.
 		\end{itemize}
 		On a représenté les différents résultats sur les graphes qui suivent.
