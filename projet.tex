@@ -636,17 +636,48 @@ $\delta x_r \to x_r - \bar x$, $\delta \theta \to \theta - \bar \theta$ et $\del
 
 \subsection*{Conclusion sur la question 3}
 
-\fbox{
+\noindent Si on prend enfin la condition intiale $X = \bar X$ correspondant au point d'équilibre associé à $\bar x = 0$
+et $x_r = 0,4 m$ de sorte que la bille parcoure $40 cm$, on a les résultats graphiques suivants :
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{resultat.pdf}
+	\caption{Réponse à une consigne constante}
+\end{figure}
+
+\noindent La bille parcourt bien $40cm$ mais tombe en réalité du rail car $x$ dépasse $0,4m$.
+
+\vspace{10px}
+
+\noindent \fbox{
 	\begin{minipage}{0.96\textwidth}
-		On prend enfin la condition intiale $X = \bar X$ correspondant au point d'équilibre associé à $\bar x = 0$
-		et $x_r = 0,4 m$ de sorte que la bille parcoure $40 cm$.
+		Afin que la bille parcoure bien $40cm$ sans tomber du rail, on garde les mêmes conditions initiales et on prend
+		les consignes suivantes qui répondent au problème :
+		\begin{itemize}
+			\item Un échelon de valeur initiale $-0,3m$ et de valeur finale $0,3m$
+			\item Une consigne sinusoïdale de phase et de biais nuls et d'amplitude $0,6m$
+			\item Une rampe de valeur initiale $-0,3m$.
+		\end{itemize}
+		On a représenté les différents résultats sur les graphes qui suivent.
 	\end{minipage}
 }
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\linewidth]{resultat.pdf}
-	\caption{Résultat du contrôle}
+	\includegraphics[width=\linewidth]{step.pdf}
+	\caption{Réponse à une consigne en échelon}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{sine.pdf}
+	\caption{Réponse à une consigne sinusoïdale}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{ramp.pdf}
+	\caption{Réponse à une rampe}
 \end{figure}
 
 \end{document}

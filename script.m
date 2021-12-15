@@ -15,7 +15,7 @@ qbar = 0;
 
 statebar = [0; 0; 0; 0];
 
-%% Fonction d'état
+%% Fonction d'état (linéarisé)
 
 M = [0 1 0 0;
     0 0 g 0;
